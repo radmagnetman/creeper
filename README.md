@@ -11,8 +11,6 @@ Recommendation: Before soldering, load 'PT_Test_Tilt_Sensor.ino' onto D1 Mini to
 
 <img width="1396" height="591" alt="Wiring" src="https://github.com/user-attachments/assets/f104e410-4c6e-46f5-b8db-0c12c5f7ba3d" />
 
-
-
 Wiring
 D1 Mini
 Solder directly to board tilt sensor on D4 and D5 (GPIO 12 and 4), test with tilt sensor code.
