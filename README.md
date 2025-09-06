@@ -9,7 +9,8 @@ https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2019/05/ESP8266-WeM
 
 Recommendation: Before soldering, load 'PT_Test_Tilt_Sensor.ino' onto D1 Mini to verify board operation. Periodically plug board in and monitor serial port to verify soldering hasn't damaged board.
 
-<img width="1395" height="665" alt="Wiring" src="https://github.com/user-attachments/assets/974449b1-d8c4-4751-881a-ad6a5808f2f0" />
+<img width="1396" height="591" alt="Wiring" src="https://github.com/user-attachments/assets/f104e410-4c6e-46f5-b8db-0c12c5f7ba3d" />
+
 
 
 Wiring
