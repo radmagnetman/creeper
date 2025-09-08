@@ -13,8 +13,9 @@ Before soldering, load 'PT_Test_Tilt_Sensor.ino' onto D1 Mini to verify board op
 
 ### Wiring
 D1 Mini\
-Solder directly to board tilt sensor on D4 and D5 (GPIO 12 and 4), test with tilt sensor code.
-Sold the following with dupont end wires
+Solder the tilt sensor directly to board on D4 and D5 (GPIO 12 and 4). The sensor should be soldered to the opposite side of the wifi module and antenna.\
+Test with tilt sensor code.\
+Solder the following with dupont end wires on the same side as the tilt sensor
 * 5V (+5V)
 * G (Ground)
 * A0 (Analog in)
@@ -25,9 +26,9 @@ NeoPixel\
 Use plastic clamps to secure strip to wires. Use around 6" of appropriate gauge/color wire.
 
 Buck converter\
-Solder leads to board for all wires except Enable
-Wire battery compartment
-Before connecting to D1 MINI, Hook up battery to Buck converter (recommend aligator clamps). 
+Solder leads to board for all wires except Enable\
+Wire battery compartment\
+Before connecting to D1 MINI, Hook up battery to Buck converter (recommend aligator clamps). \
 Use multimeter to measure voltage. Adjust with on-board pot to +5V.
 
 Connect buck converter to positive of battery\
@@ -42,5 +43,12 @@ Trim excess resistor wire. \
 Use piece of tape wrap around resistor and all solder points, folding tape back on itself to cover all bare wires. Recommend gaffers tape. \
 Solder signal wire to A0 on D1 Mini
 
-There should be 5 ground connection: battery, knock sensor, NeoPixel, Buck converter, D1 Mini
-Start grouping wires into pairs where possible, twisitng and soldering pairs together. Once down to three leads, connect all 3 with a Wago. 
+There should be 5 ground connection: 
+* battery
+* *knock sensor
+* NeoPixel
+* Buck converter
+* D1 Mini
+
+Start grouping wires into pairs where possible, twisitng and soldering pairs together. \
+Once down to three leads, connect all 3 with a Wago. 
