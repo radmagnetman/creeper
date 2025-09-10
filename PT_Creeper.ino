@@ -10,7 +10,7 @@
 */
 #include <Adafruit_NeoPixel.h>
 #include <math.h>
-
+// test 1
 /*
   The following declarations create the various state machines
   needed for operation
