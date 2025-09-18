@@ -7,10 +7,11 @@
 
   Author: T. Wright
   Date: 8/31/2025
+  Modified: 9/18/2025
 */
 #include <Adafruit_NeoPixel.h>
 #include <math.h>
-// test 1
+
 /*
   The following declarations create the various state machines
   needed for operation
@@ -85,8 +86,8 @@ bool knockDetected = false;
 
 
 /* Tilt sensor *************/
-#define TILTSENSORPIN 14//2
-#define TILTSENSORPINPOWER 12//3
+#define TILTSENSORPIN 14
+#define TILTSENSORPINPOWER 12
 bool currentDirection = false;
 uint32_t lastTiltSwitch = millis();
 uint32_t tiltDebounce = 500;
@@ -98,7 +99,7 @@ bool lastTiltFlag = false;
 bool flipped = false;
 
 /* Define Neopixel *********/
-#define LED_PIN    5//6
+#define LED_PIN    5
 // How many NeoPixels are attached to the Arduino?
 #define LED_COUNT 14
 // Declare our NeoPixel strip object:
@@ -158,6 +159,13 @@ void loop() {
   }
 
   if(millis()-lastTiltSwitch > tiltDebounce) {
+    /*
+      This if statement reads the titl sensor digital i/o pin. It performs
+      a running average until the average values ttransitions between 0/1 states.
+      To increase the time it takes to recognize a new value, increase 
+      tiltIintegrationSteps variable in the declarations above.
+      This routine also sets a global flag if tilt state changes.
+    */
     currentDirection = digitalRead(TILTSENSORPIN);
     tiltAverage = lastTiltAverage * (tiltIintegrationSteps-1.0)/tiltIintegrationSteps + double(currentDirection)/tiltIintegrationSteps;
     lastTiltAverage = tiltAverage;
@@ -330,15 +338,6 @@ void loop() {
         break;
       case GAME_1A:
         /*
-          Robots must defuse Creepers to protect the village. Multiple strategies are possible:
-          Tap to Inert – Tap a Creeper 5 times → it turns RED (inert). Respawns after 10s.
-          Flip to Inert – Flip a Creeper to the stone side → it turns BLUE (inert).  
-                          Respawns after 20 seconds.
-          Dump in Lava – Push Creepers into the lava river → permanently neutralized 
-                         (unless recovered by opposing Human Player while active).
-          Dungeon - Push Creepers into Dungeon → Human Player interacts, 
-                    makes Creeper inert, and ejects it back into field.
- 
           Steps for sprint 1a
           1 - Wait for knock, fade on green go to 2
           2 - Wait for knock, fade off green go to 1
@@ -351,8 +350,7 @@ void loop() {
           Serial.println(game1A_step);
           lastStep = game1A_step;
         }
-        //Serial.print("flag: ");Serial.println(tiltFlag);
-
+        
         switch(game1A_step) {
           case GAME_1A_STEP_0:
             currentBrightness = 0;
@@ -416,18 +414,13 @@ void loop() {
         }
         break;
       case GAME_1B:
-        /* Steps for sprint 1B
-          0 - Turn off all pixels, set color to gren
-          
-             
-        */
         knockThreshold = game1B_knockThreshold;
         if(lastStep != game1B_step) {
           Serial.print("game_1B step: ");
           Serial.println(game1B_step);
           lastStep = game1B_step;
         }
-        //Serial.print("flag: ");Serial.println(tiltFlag);
+        
         
         switch(game1B_step) {
           case GAME_1B_STEP_0: // Start
@@ -449,7 +442,8 @@ void loop() {
             if(currentBrightness <= 0 || currentBrightness > 1000){currentBrightness = 0;fadeOn = true;}
             
             strip.setBrightness(currentBrightness);
-            //Serial.print("pixel index: ");Serial.println(currentPixelIndex);
+            
+            // Update pixel colors
             for(int i=0;i<LED_COUNT;i++){
               if(i < currentPixelIndex)
               {strip.setPixelColor(i,red);}
@@ -458,14 +452,15 @@ void loop() {
             }
             strip.show();
 
+            // When knock detect, increment knock count and check against threshold. 
+            //  Also, change 3 pixels from green to red. 
+            // When threshold reached, reset values, go to waiting
             if(knockDetected && ((millis() - lastKnock_ms) > knockInterval_ms)){
               knockDetected = false;
               lastKnock_ms = millis();
               knockCount++;
               currentPixelIndex = currentPixelIndex+3;
-              //strip.setPixelColor(currentPixelIndex--,off);
-              //strip.setPixelColor(currentPixelIndex--,off);
-              //strip.show();
+              
               if(knockCount >= knockThreshold) {
                 knockCount = 0;
                 game1B_step = GAME_1B_STEP_2;
@@ -476,7 +471,9 @@ void loop() {
                 strip.show();            
               }
             }
-
+            
+            // If the creeper is detected to be flipped via code in above, set blue
+            //  and go to wait state
             if(flipped) {
               game1B_step = GAME_1B_STEP_3;
               game1B_lastColorHold = millis();
