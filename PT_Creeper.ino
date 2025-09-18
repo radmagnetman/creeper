@@ -49,6 +49,22 @@ int fadeRateMultiplier = 5;
 #define GAME_1A_STEP_5 5
 int game1A_step = GAME_1A_STEP_0;
 
+// Game mode 1b
+#define GAME_1B 5
+#define GAME_1B_STEP_0 0
+#define GAME_1B_STEP_1 1
+#define GAME_1B_STEP_2 2
+#define GAME_1B_STEP_3 3
+#define GAME_1B_STEP_4 4
+int game1B_step = GAME_1B_STEP_0;
+int knockInterval_ms = 1000;
+int lastKnock_ms = 0;
+bool fadeOn = true; // True meads fade on, false fade off
+int knockCount = 0;
+int game1B_knockThreshold = 5;
+int game1B_redHold_ms = 20000;
+int game1B_blueHold_ms = 20000;
+int game1B_lastColorHold = 0;
 
 /* 
   Used to track when to do events. If microcontroller runs at 
@@ -67,17 +83,19 @@ uint32_t lastKnockRead = millis();
 int knockReading = 0;
 bool knockDetected = false;
 
+
 /* Tilt sensor *************/
 #define TILTSENSORPIN 14//2
 #define TILTSENSORPINPOWER 12//3
 bool currentDirection = false;
-bool lastDirection = false;
 uint32_t lastTiltSwitch = millis();
 uint32_t tiltDebounce = 500;
 double tiltAverage = 0;
 double lastTiltAverage = 0;
 double tiltIintegrationSteps = 10;
 bool tiltFlag = false;
+bool lastTiltFlag = false;
+bool flipped = false;
 
 /* Define Neopixel *********/
 #define LED_PIN    5//6
@@ -93,17 +111,18 @@ uint32_t blue = strip.Color(0, 0, 255);
 uint32_t off = strip.Color(0, 0, 0);
 
 uint32_t currentBrightness = 50; // Tracks current brightness value
-uint32_t maxBrightness = 100; // 0-255, above 100 didn't see much difference
+uint32_t maxBrightness = 150; // 0-255, above 100 didn't see much difference
 uint32_t currentPixelIndex = 0; // Used for sequential pixel actions
 uint32_t currentPixelColor = off; //used to set global color
 /***************************/
 
 void setup() {
 
-  operationState = GAME_1A;
+  operationState = GAME_1B;
 
   // init serial and timers
   Serial.begin(115200);
+  delay(100);
   Serial.println("Starting creeper");
   time_ms = millis();
   delay(100);
@@ -138,11 +157,6 @@ void loop() {
     prevOperationState = operationState;
   }
 
-  // debounce timing and update of tilt sensor status
-  //double tiltAverage = 0;
-  //double lastTiltAverage = 0;
-  //double tiltIintegrationSteps = 10;
-
   if(millis()-lastTiltSwitch > tiltDebounce) {
     currentDirection = digitalRead(TILTSENSORPIN);
     tiltAverage = lastTiltAverage * (tiltIintegrationSteps-1.0)/tiltIintegrationSteps + double(currentDirection)/tiltIintegrationSteps;
@@ -151,13 +165,13 @@ void loop() {
     if(round(tiltAverage) == 1) {tiltFlag = true;}
     else
     {tiltFlag = false;}
+
+    if(lastTiltFlag != tiltFlag) {
+      lastTiltFlag = tiltFlag;
+      flipped = true;
+      Serial.println("Flipped!");
+    }
     
-    /*if(currentDirection != lastDirection) {
-      Serial.print("Direction: ");
-      Serial.println(currentDirection);
-      lastDirection = currentDirection;
-      tiltAverage = lastTiltAverage * (100-1)/100 + currentDirection/100;
-    }*/
     lastTiltSwitch = millis();
   }
 
@@ -182,6 +196,7 @@ void loop() {
       'ur','ug','ub': Turn on color, 1 by 1, then turn off, repeat
       'fr','fg','fb': Fade all on at specified color, then fade off
       'ga': Game mode 1a. Single knock on or off
+      'gb': Game mode 1b. 
   */  
   byte1 = 0;
   byte2 = 0;
@@ -239,12 +254,17 @@ void loop() {
           currentPixelColor = red;break;
         case 'g':
           currentPixelColor = green;break;
-        case 'b':
+        case 'l':
           currentPixelColor = blue;break;
         case 'a':
           found_g = false;
           operationState = GAME_1A;
           game1A_step = GAME_1A_STEP_0;
+          break;
+        case 'b':
+          found_g = false;
+          operationState = GAME_1B;
+          game1B_step = GAME_1B_STEP_0;
           break;
       }
     }
@@ -309,7 +329,17 @@ void loop() {
         strip.show();
         break;
       case GAME_1A:
-        /* Steps for sprint 1a
+        /*
+          Robots must defuse Creepers to protect the village. Multiple strategies are possible:
+          Tap to Inert – Tap a Creeper 5 times → it turns RED (inert). Respawns after 10s.
+          Flip to Inert – Flip a Creeper to the stone side → it turns BLUE (inert).  
+                          Respawns after 20 seconds.
+          Dump in Lava – Push Creepers into the lava river → permanently neutralized 
+                         (unless recovered by opposing Human Player while active).
+          Dungeon - Push Creepers into Dungeon → Human Player interacts, 
+                    makes Creeper inert, and ejects it back into field.
+ 
+          Steps for sprint 1a
           1 - Wait for knock, fade on green go to 2
           2 - Wait for knock, fade off green go to 1
               if 1 or 2 picks up knock, go to 3
@@ -321,12 +351,13 @@ void loop() {
           Serial.println(game1A_step);
           lastStep = game1A_step;
         }
-        Serial.print("flag: ");Serial.println(tiltFlag);
+        //Serial.print("flag: ");Serial.println(tiltFlag);
 
         switch(game1A_step) {
           case GAME_1A_STEP_0:
             currentBrightness = 0;
             currentPixelColor = green;
+            flipped = false;
             strip.clear();
             strip.show();
             game1A_step = GAME_1A_STEP_1;
@@ -381,7 +412,97 @@ void loop() {
             }
             if(tiltFlag) {game1A_step = GAME_1A_STEP_0;}
             break;
+        
         }
+        break;
+      case GAME_1B:
+        /* Steps for sprint 1B
+          0 - Turn off all pixels, set color to gren
+          
+             
+        */
+        knockThreshold = game1B_knockThreshold;
+        if(lastStep != game1B_step) {
+          Serial.print("game_1B step: ");
+          Serial.println(game1B_step);
+          lastStep = game1B_step;
+        }
+        //Serial.print("flag: ");Serial.println(tiltFlag);
+        
+        switch(game1B_step) {
+          case GAME_1B_STEP_0: // Start
+            flipped = false;
+            currentBrightness = 0;
+            currentPixelColor = green;
+            strip.fill(green, 0, LED_COUNT);
+            strip.clear();
+            strip.show();
+            game1B_step = GAME_1B_STEP_1;
+            currentPixelIndex = 0;
+            knockDetected = false;
+            break;
+          case GAME_1B_STEP_1: // Fade green until knocked or flipped
+            if(fadeOn) {currentBrightness += fadeRateMultiplier;}
+            else {currentBrightness -= fadeRateMultiplier;}
+            
+            if(currentBrightness >= maxBrightness){currentBrightness = maxBrightness;fadeOn = false;}
+            if(currentBrightness <= 0 || currentBrightness > 1000){currentBrightness = 0;fadeOn = true;}
+            
+            strip.setBrightness(currentBrightness);
+            //Serial.print("pixel index: ");Serial.println(currentPixelIndex);
+            for(int i=0;i<LED_COUNT;i++){
+              if(i < currentPixelIndex)
+              {strip.setPixelColor(i,red);}
+              else
+              {strip.setPixelColor(i,green);}
+            }
+            strip.show();
+
+            if(knockDetected && ((millis() - lastKnock_ms) > knockInterval_ms)){
+              knockDetected = false;
+              lastKnock_ms = millis();
+              knockCount++;
+              currentPixelIndex = currentPixelIndex+3;
+              //strip.setPixelColor(currentPixelIndex--,off);
+              //strip.setPixelColor(currentPixelIndex--,off);
+              //strip.show();
+              if(knockCount >= knockThreshold) {
+                knockCount = 0;
+                game1B_step = GAME_1B_STEP_2;
+                game1B_lastColorHold = millis();
+                currentBrightness = maxBrightness;
+                currentPixelColor = red;
+                strip.fill(currentPixelColor, 0, LED_COUNT);
+                strip.show();            
+              }
+            }
+
+            if(flipped) {
+              game1B_step = GAME_1B_STEP_3;
+              game1B_lastColorHold = millis();
+              knockCount = 0;
+              currentBrightness = maxBrightness;
+              currentPixelColor = blue;
+              strip.fill(currentPixelColor, 0, LED_COUNT);
+              strip.show();            
+            }
+
+            break;
+          case GAME_1B_STEP_2: // wait for red time out
+            if(millis() - game1B_lastColorHold > game1B_redHold_ms) {
+              game1B_step = GAME_1B_STEP_0;
+            }
+            break;
+          case GAME_1B_STEP_3: // wait for blue time out
+            if(millis() - game1B_lastColorHold > game1B_blueHold_ms) {
+              game1B_step = GAME_1B_STEP_0;
+            }
+            break;
+          case GAME_1B_STEP_4: // unused
+            break;
+
+        }
+        break;
     }
   }
 

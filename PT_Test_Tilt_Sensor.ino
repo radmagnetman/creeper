@@ -1,4 +1,4 @@
-/* Tilt sensor *************/
+/*
 #define TILTSENSORPIN 14  // D5 on D1 Mini
 #define TILTSENSORPINPOWER 12 // D6 on D1 Mini
 bool currentDirection = false;
@@ -26,3 +26,4 @@ void loop() {
   
   delay(1000);
 }
+*/
