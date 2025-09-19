@@ -63,9 +63,13 @@ int lastKnock_ms = 0;
 bool fadeOn = true; // True meads fade on, false fade off
 int knockCount = 0;
 int game1B_knockThreshold = 5;
-int game1B_redHold_ms = 20000;
+int game1B_redHold_ms = 16000;//20000;
 int game1B_blueHold_ms = 20000;
 int game1B_lastColorHold = 0;
+bool game1B_flashState = false;
+int game1B_flashTimes = 4;
+int game1B_flashInterval_ms = 500;
+int game1B_lastFlash = 0;
 
 /* 
   Used to track when to do events. If microcontroller runs at 
@@ -444,11 +448,98 @@ void loop() {
             strip.setBrightness(currentBrightness);
             
             // Update pixel colors
-            for(int i=0;i<LED_COUNT;i++){
+            /*for(int i=0;i<LED_COUNT;i++){
               if(i < currentPixelIndex)
               {strip.setPixelColor(i,red);}
               else
               {strip.setPixelColor(i,green);}
+            }*/
+            switch(knockCount){
+              case 0:
+                for(int i=0;i<LED_COUNT;i++){strip.setPixelColor(i,green);}
+                break;
+              case 1: // 0, 5, 10
+                strip.setPixelColor(0,red);
+                strip.setPixelColor(1,green);
+                strip.setPixelColor(2,green);
+                strip.setPixelColor(3,green);
+                strip.setPixelColor(4,green);
+                strip.setPixelColor(5,red);
+                strip.setPixelColor(6,green);
+                strip.setPixelColor(7,green);
+                strip.setPixelColor(8,green);
+                strip.setPixelColor(9,green);
+                strip.setPixelColor(10,red);
+                strip.setPixelColor(11,green);
+                strip.setPixelColor(12,green);
+                strip.setPixelColor(13,green);
+                break;
+              case 2: //1,6,11
+                strip.setPixelColor(0,red);
+                strip.setPixelColor(1,red);
+                strip.setPixelColor(2,green);
+                strip.setPixelColor(3,green);
+                strip.setPixelColor(4,green);
+                strip.setPixelColor(5,red);
+                strip.setPixelColor(6,red);
+                strip.setPixelColor(7,green);
+                strip.setPixelColor(8,green);
+                strip.setPixelColor(9,green);
+                strip.setPixelColor(10,red);
+                strip.setPixelColor(11,red);
+                strip.setPixelColor(12,green);
+                strip.setPixelColor(13,green);
+                break;
+              case 3: //2,7,12
+                strip.setPixelColor(0,red);
+                strip.setPixelColor(1,red);
+                strip.setPixelColor(2,red);
+                strip.setPixelColor(3,green);
+                strip.setPixelColor(4,green);
+                strip.setPixelColor(5,red);
+                strip.setPixelColor(6,red);
+                strip.setPixelColor(7,red);
+                strip.setPixelColor(8,green);
+                strip.setPixelColor(9,green);
+                strip.setPixelColor(10,red);
+                strip.setPixelColor(11,red);
+                strip.setPixelColor(12,red);
+                strip.setPixelColor(13,green);
+
+                break;
+              case 4://3,8,13
+                strip.setPixelColor(0,red);
+                strip.setPixelColor(1,red);
+                strip.setPixelColor(2,red);
+                strip.setPixelColor(3,red);
+                strip.setPixelColor(4,green);
+                strip.setPixelColor(5,red);
+                strip.setPixelColor(6,red);
+                strip.setPixelColor(7,red);
+                strip.setPixelColor(8,red);
+                strip.setPixelColor(9,green);
+                strip.setPixelColor(10,red);
+                strip.setPixelColor(11,red);
+                strip.setPixelColor(12,red);
+                strip.setPixelColor(13,red);
+                break;
+              case 5: //4,9
+                strip.setPixelColor(0,red);
+                strip.setPixelColor(1,red);
+                strip.setPixelColor(2,red);
+                strip.setPixelColor(3,red);
+                strip.setPixelColor(4,red);
+                strip.setPixelColor(5,red);
+                strip.setPixelColor(6,red);
+                strip.setPixelColor(7,red);
+                strip.setPixelColor(8,red);
+                strip.setPixelColor(9,red);
+                strip.setPixelColor(10,red);
+                strip.setPixelColor(11,red);
+                strip.setPixelColor(12,red);
+                strip.setPixelColor(13,red);
+                break;
+
             }
             strip.show();
 
@@ -463,7 +554,7 @@ void loop() {
               
               if(knockCount >= knockThreshold) {
                 knockCount = 0;
-                game1B_step = GAME_1B_STEP_2;
+                game1B_step = GAME_1B_STEP_4;
                 game1B_lastColorHold = millis();
                 currentBrightness = maxBrightness;
                 currentPixelColor = red;
@@ -496,6 +587,29 @@ void loop() {
             }
             break;
           case GAME_1B_STEP_4: // unused
+              //bool game1B_flashState = false;
+              //int game1B_flashTimes = 3;
+              //int game1B_flashInterval_ms = 500;
+              currentPixelColor = red;
+              if((millis() - game1B_lastFlash) > game1B_flashInterval_ms){
+                game1B_lastFlash = millis();
+                if(game1B_flashState) {
+                  strip.fill(currentPixelColor, 0, LED_COUNT);
+                  game1B_flashState = false;
+                }
+                else {
+                  game1B_flashTimes--;
+                  strip.fill(off, 0, LED_COUNT);
+                  game1B_flashState = true;
+                }
+              }
+            
+            if(game1B_flashTimes == 0) {
+              game1B_step = GAME_1B_STEP_2;
+              game1B_flashTimes = 3;
+              strip.fill(currentPixelColor, 0, LED_COUNT);
+            }
+            strip.show();
             break;
 
         }
