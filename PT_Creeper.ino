@@ -459,87 +459,92 @@ void loop() {
                 for(int i=0;i<LED_COUNT;i++){strip.setPixelColor(i,green);}
                 break;
               case 1: // 0, 5, 10
-                strip.setPixelColor(0,red);
-                strip.setPixelColor(1,green);
+                strip.setPixelColor(0,green); //
+                strip.setPixelColor(1,red);
                 strip.setPixelColor(2,green);
-                strip.setPixelColor(3,green);
+                strip.setPixelColor(3,green); //
                 strip.setPixelColor(4,green);
                 strip.setPixelColor(5,red);
                 strip.setPixelColor(6,green);
-                strip.setPixelColor(7,green);
-                strip.setPixelColor(8,green);
+                strip.setPixelColor(7,green); //
+                strip.setPixelColor(8,red);
                 strip.setPixelColor(9,green);
-                strip.setPixelColor(10,red);
-                strip.setPixelColor(11,green);
+                strip.setPixelColor(10,green); //
+                strip.setPixelColor(11,red);
                 strip.setPixelColor(12,green);
                 strip.setPixelColor(13,green);
                 break;
               case 2: //1,6,11
-                strip.setPixelColor(0,red);
+                strip.setPixelColor(0,green); //
                 strip.setPixelColor(1,red);
                 strip.setPixelColor(2,green);
-                strip.setPixelColor(3,green);
+                strip.setPixelColor(3,green); //
                 strip.setPixelColor(4,green);
                 strip.setPixelColor(5,red);
-                strip.setPixelColor(6,red);
-                strip.setPixelColor(7,green);
-                strip.setPixelColor(8,green);
+                strip.setPixelColor(6,green);
+                strip.setPixelColor(7,green); //
+                strip.setPixelColor(8,red);
                 strip.setPixelColor(9,green);
-                strip.setPixelColor(10,red);
+                strip.setPixelColor(10,green); //
                 strip.setPixelColor(11,red);
                 strip.setPixelColor(12,green);
                 strip.setPixelColor(13,green);
                 break;
               case 3: //2,7,12
-                strip.setPixelColor(0,red);
+                strip.setPixelColor(0,green); //
                 strip.setPixelColor(1,red);
-                strip.setPixelColor(2,red);
-                strip.setPixelColor(3,green);
+                strip.setPixelColor(2,green);
+                strip.setPixelColor(3,green); //
                 strip.setPixelColor(4,green);
                 strip.setPixelColor(5,red);
-                strip.setPixelColor(6,red);
-                strip.setPixelColor(7,red);
-                strip.setPixelColor(8,green);
+                strip.setPixelColor(6,green);
+                strip.setPixelColor(7,green); //
+                strip.setPixelColor(8,red);
                 strip.setPixelColor(9,green);
-                strip.setPixelColor(10,red);
+                strip.setPixelColor(10,green); //
                 strip.setPixelColor(11,red);
-                strip.setPixelColor(12,red);
+                strip.setPixelColor(12,green);
                 strip.setPixelColor(13,green);
-
                 break;
               case 4://3,8,13
-                strip.setPixelColor(0,red);
+                strip.setPixelColor(0,green); //
                 strip.setPixelColor(1,red);
-                strip.setPixelColor(2,red);
-                strip.setPixelColor(3,red);
+                strip.setPixelColor(2,green);
+                strip.setPixelColor(3,green); //
                 strip.setPixelColor(4,green);
                 strip.setPixelColor(5,red);
-                strip.setPixelColor(6,red);
-                strip.setPixelColor(7,red);
+                strip.setPixelColor(6,green);
+                strip.setPixelColor(7,green); //
                 strip.setPixelColor(8,red);
                 strip.setPixelColor(9,green);
-                strip.setPixelColor(10,red);
+                strip.setPixelColor(10,green); //
                 strip.setPixelColor(11,red);
-                strip.setPixelColor(12,red);
-                strip.setPixelColor(13,red);
+                strip.setPixelColor(12,green);
+                strip.setPixelColor(13,green);
                 break;
               case 5: //4,9
-                strip.setPixelColor(0,red);
+                strip.setPixelColor(0,green); //
                 strip.setPixelColor(1,red);
-                strip.setPixelColor(2,red);
-                strip.setPixelColor(3,red);
-                strip.setPixelColor(4,red);
+                strip.setPixelColor(2,green);
+                strip.setPixelColor(3,green); //
+                strip.setPixelColor(4,green);
                 strip.setPixelColor(5,red);
-                strip.setPixelColor(6,red);
-                strip.setPixelColor(7,red);
+                strip.setPixelColor(6,green);
+                strip.setPixelColor(7,green); //
                 strip.setPixelColor(8,red);
-                strip.setPixelColor(9,red);
-                strip.setPixelColor(10,red);
+                strip.setPixelColor(9,green);
+                strip.setPixelColor(10,green); //
                 strip.setPixelColor(11,red);
-                strip.setPixelColor(12,red);
-                strip.setPixelColor(13,red);
+                strip.setPixelColor(12,green);
+                strip.setPixelColor(13,green);
                 break;
 
+            }
+            
+
+          if((millis() - lastKnock_ms) > knockInterval_ms) {
+              for(int i=0;i<LED_COUNT;i++){strip.setPixelColor(i,green);}
+                
             }
             strip.show();
 
